@@ -1,0 +1,344 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1138
+{\fonttbl\f0\fnil\fcharset0 AndaleMono;\f1\fnil\fcharset0 Menlo-Regular;\f2\fnil\fcharset0 LucidaGrande;
+\f3\fnil\fcharset0 Menlo-Italic;\f4\fmodern\fcharset0 Courier;\f5\fnil\fcharset0 Verdana;
+\f6\fmodern\fcharset0 Courier-Oblique;}
+{\colortbl;\red255\green255\blue255;\red38\green38\blue38;\red63\green110\blue116;\red38\green71\blue75;
+\red92\green38\blue153;\red196\green26\blue22;\red100\green56\blue32;\red28\green0\blue207;\red170\green13\blue145;
+\red112\green188\blue87;\red0\green116\blue0;\red0\green60\blue82;\red46\green13\blue110;\red10\green25\blue3;
+\red132\green31\blue124;\red13\green2\blue2;\red29\green27\blue203;\red42\green94\blue16;\red85\green142\blue40;
+\red63\green105\blue30;\red43\green71\blue20;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww18320\viewh10520\viewkind0
+\deftab720
+\pard\pardeftab720
+
+\f0\fs28 \cf2 \
+1) Usando 1 sprite\
+\
+a) Instancio el director primero para determinar que tipo de dispositivo es: Retina o inferior (3G, 3GS, iPod)\
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1 \cf3 \CocoaLigature0 	CCDirector\cf0  *director = [\cf3 CCDirector\cf0  \cf4 sharedDirector\cf0 ];
+\f0 \cf2 \CocoaLigature1 \
+\pard\pardeftab720
+\cf2 \
+b) Para colocar el sprite en una posici\'f3n de pantalla determinada, debo saber el tama\'f1o de la pantalla que usa el dispositivo (relacionado con el director)\
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1 \cf5 \CocoaLigature0 	CGSize\cf0  size = [[\cf3 CCDirector\cf0  \cf4 sharedDirector\cf0 ] \cf4 winSize\cf0 ];
+\fs22 \
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f0\fs28 \cf0 c) Instanciamos el objeto Sprite e indicamos su posici\'f3n en pantalla, a\'f1adimos el hijo sprite.\cf2 \CocoaLigature1 \
+\pard\pardeftab720
+\cf2 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0   
+\fs28   \cf3 CCSprite\cf0  *sprite = [\cf3 CCSprite\cf0  \cf4 spriteWithFile\cf0 :\cf6 @"bug.png"\cf0 ];\
+    sprite.\cf3 position\cf0  =  \cf7 ccp\cf0 ( size.\cf5 width\cf0 /\cf8 2\cf0  , size.\cf5 height\cf0 /\cf8 2\cf0 );\
+    [\cf9 self\cf0  \cf4 addChild\cf0 :sprite];
+\f0 \cf2 \CocoaLigature1 \
+\pard\pardeftab720
+\cf10 \
+///FONDO DE PANTALLA o Background\
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf11 \CocoaLigature0   CCSprite *background = [CCSprite spriteWithFile:@"background.png"];\cf0 \
+  background.\cf3 anchorPoint\cf0  = \cf5 CGPointZero\cf0 ;\
+  [\cf9 self\cf0  \cf4 addChild\cf0 :background];\
+\pard\pardeftab720
+
+\f0\fs28 \cf10 \CocoaLigature1 \
+\
+//Agregar SpriteSheet \
+\pard\pardeftab720
+\cf0 \
+2) Usar el SpriteSheet. Colocar en el .h\
+\
+a)  CCSprite   * \cf12 vspriteFromSheet\cf0 ; \
+    CCSpriteBatchNode  *vBatchNode;\
+\
+b) Declaramos los m\'e9todos accesores o las propiedades que usaremos para el sprite en la interfaz. Colocarlo en el .h\
+El nonatomic es m\'e1s r\'e1pido que el atomic, y estos tienen que ver con los getter/Setter\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf11 \CocoaLigature0 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs28 \cf11 	//Metodo accesor\cf0 \
+\pard\tx560\pardeftab560\pardirnatural
+\cf9 	@property\cf0  (\cf9 nonatomic\cf0 , \cf9 retain\cf0 ) \cf3 CCSprite\cf0  *spriteFromSheet;\
+\
+c) se implementa dicha propiedad en el archivo de implementaci\'f3n, le indicamos que el get ser\'e1 la variable atributo CCSprite\
+\
+\cf9 	@synthesize\cf0  spriteFromSheet = \cf3 vspriteFromSheet\cf0 ;\
+\
+d) asigno el plist usando el m\'e9todo ccspriteframecache, significa que cargar\'e1 el archivo plist en la cach\'e9\
+	\
+	[[\cf3 CCSpriteFrameCache\cf0  \cf4 sharedSpriteFrameCache\cf0 ] \cf4 addSpriteFramesWithFile\cf0 :\cf6 @"NCat.plist"\cf0 ];\
+\
+e) Asigno a un batchNode el png asociado al plist, un batch node en una sola llamada dibujar\'e1 con el 
+\f2\fs24 \CocoaLigature1  
+\fs28 OpenGL y solo hace referencia a una y \'fanica textura y solo los sprites contenidos en dicha textura pueden ser a\'f1adidos al CCSpriteBatchNode. Esto lo que hace es que se llame solo una vez a OpenGL ES para que dibuje la textura o sprite, si no se usara el OpenGL tendr\'eda que ser llamado cada vez, haciendo todo el proceso menos eficiente.
+\f1 \CocoaLigature0 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs22 \cf0      \
+	
+\fs28 \cf3 CCSpriteBatchNode\cf0  *spriteSheet = [\cf3 CCSpriteBatchNode\cf0  \cf4 batchNodeWithFile\cf0 :\cf6 @"NCat.png"\cf0 ];\
+    [\cf9 self\cf0  \cf4 addChild\cf0 :spriteSheet];\
+ \
+f) Ahora le indico al m\'e9todo accesor que seleccione un sprite del sprite sheet\
+\
+
+\fs22 	
+\fs28 	\cf9 self\cf0 .\cf3 spriteFromSheet\cf0  = [\cf3 CCSprite\cf0  \cf4 spriteWithSpriteFrameName\cf0 :\cf6 @"capa1.png"\cf0 ];\
+\pard\tx560\pardeftab560\pardirnatural
+\cf3 		vspriteFromSheet\cf0 .\cf3 position\cf0  =  \cf7 ccp\cf0 (size.\cf5 width\cf0  * \cf8 0.1\cf0 , size.\cf5 height\cf0  * \cf8 0.5\cf0 );\
+		[spriteSheet \cf4 addChild\cf0 :\cf3 vspriteFromSheet\cf0 ];\
+\
+\
+\
+3) ANIMACION\
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs22 \cf0 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs28 \cf0 a) Instancio variables en el interface (.h) para animaci\'f3n y movimiento del sprite
+\fs22 \
+\
+    
+\fs28 \cf3 CCAction\cf0  *vwalkAction;\
+\
+b) Las propiedades de los m\'e9todos accesores\
+   .h\cf9 \
+   @property\cf0  (\cf9 nonatomic\cf0 , \cf9 retain\cf0 ) \cf3 CCAction\cf0  *walkAction;\
+\pard\tx560\pardeftab560\pardirnatural
+\cf9 	\cf0 \
+	\
+   .m\
+\cf9 	@synthesize\cf0  walkAction = \cf3 vwalkAction\cf0 ;\
+\cf9 	\cf0 \
+\
+c) Creamos un arreglo para animar los sprites. Usar el CCSpriteFromCache en este caso no se a\'f1ade solo se ubica el sprite que lleve el nombre deseado\
+\
+\pard\tx560\pardeftab560\pardirnatural
+\cf5     NSMutableArray\cf0  *walkAnimFrames = [\cf5 NSMutableArray\cf0  \cf13 array\cf0 ];\
+        \cf9 for\cf0 (\cf9 int\cf0  i = \cf8 1\cf0 ; i <= \cf8 12\cf0 ; ++i) \{\
+            [walkAnimFrames \cf13 addObject\cf0 :\
+             [[\cf3 CCSpriteFrameCache\cf0  \cf4 sharedSpriteFrameCache\cf0 ] \cf4 spriteFrameByName\cf0 :\
+              [\cf5 NSString\cf0  \cf13 stringWithFormat\cf0 :\cf6 @"capa%d.png"\cf0 , i]]];\
+        \}\
+d) Realizamos el proceso de animaci\'f3n\
+
+\fs22     
+\fs28     \cf3 CCAnimation\cf0  *walkAnim = [\cf3 CCAnimation\cf0  \cf4 animationWithFrames\cf0 :walkAnimFrames \cf4 delay\cf0 :\cf8 0.1f\cf0 ];\
+        \cf9 self\cf0 .\cf3 walkAction\cf0  = [\cf3 CCRepeatForever\cf0  \cf4 actionWithAction\cf0 :\
+                           [\cf3 CCAnimate\cf0  \cf4 actionWithAnimation\cf0 :walkAnim \cf4 restoreOriginalFrame\cf0 :\cf9 NO\cf0 ]];\
+e) Agrego\
+\
+        [\cf3 vBatchNode\cf0  \cf4 addChild\cf0 :\cf3 vSpriteFromSheet\cf0  \cf4 z\cf0 :-\cf8 1\cf0 ];\
+        [\cf3 vSpriteFromSheet\cf0  \cf4 runAction\cf0 :\cf3 vwalkAction\cf0 ];
+\fs22 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\f0\fs28 \cf0 \CocoaLigature1 \
+\
+3) MOVER EL GATO\
+\
+a) Instanciar\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0     
+\fs28  \
+    \cf3 CCAction\cf0  *vmoveAction;\
+    \cf9 BOOL\cf0  vmoving;
+\fs22 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\f0\fs28 \cf0 \CocoaLigature1 \
+   
+\f1 \cf9 \CocoaLigature0 @property\cf0  (\cf9 nonatomic\cf0 , \cf9 retain\cf0 ) \cf3 CCAction\cf0  *moveAction;\
+\pard\tx560\pardeftab560\pardirnatural
+\cf9 	@synthesize\cf0  moveAction = \cf3 vmoveAction\cf0 ;
+\f0 \CocoaLigature1 \
+   
+\f1 \CocoaLigature0 \
+\
+b) Activamos el touchEnable y el aceler\'f3metro en el init\
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs22 \cf0         
+\fs28 \cf9 self\cf0 .\cf3 isTouchEnabled\cf0  = \cf9 YES\cf0 ;\
+       \cf9 self\cf0 .\cf3 isAccelerometerEnabled\cf0  = \cf9 YES\cf0 ;\
+\
+c) \
+\
+\pard\pardeftab720\sl300
+\cf14 \CocoaLigature1 -(\cf15 void\cf14 )\cf16  registerWithTouchDispatcher\
+\cf14 \{\cf16 \
+    \cf14 [[\cf16 CCTouchDispatcher sharedDispatcher\cf14 ]\cf16  addTargetedDelegate\cf14 :\cf16 self priority\cf14 :\cf17 0\cf16  \
+        swallowsTouches\cf14 :\cf15 YES\cf14 ]\cf16 ;\
+\cf14 \}\cf16 \
+\'a0\
+\cf14 -(\cf15 BOOL\cf14 )\cf16  ccTouchBegan\cf14 :(\cf16 UITouch \cf14 *)\cf16 touch withEvent\cf14 :(\cf16 UIEvent \cf14 *)\cf16 event \cf14 \{\cf16 \
+	\cf15 return\cf16  \cf15 YES\cf16 ;\
+\cf14 \}\cf16 \
+\'a0\
+\cf14 -(\cf15 void\cf14 )\cf16  ccTouchEnded\cf14 :(\cf16 UITouch \cf14 *)\cf16 touch withEvent\cf14 :(\cf16 UIEvent \cf14 *)\cf16 event \cf14 \{\cf16     \
+    
+\f3\i \cf18 // Lo que viene en el sgte paso   
+\f1\i0 \cf16 \
+\cf14 \}\cf16 \
+\'a0\
+\cf14 -(\cf15 void\cf14 )\cf16 bearMoveEnded \cf14 \{\cf16 \
+    \cf14 [\cf3 \CocoaLigature0 vSpriteFromSheet\cf16 \CocoaLigature1  stopAction\cf14 :\cf16 vwalkAction\cf14 ]\cf16 ;\
+    vmoving \cf14 =\cf16  FALSE;\
+\cf14 \}\cf16 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\f0 \cf0 \
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1 \cf0 d) a\'f1adimos luego en ccTouchEnded para que el gato se voltee 
+\f0 \
+\
+\pard\pardeftab720\sl300
+
+\f4 \cf14 -(\cf15 void\cf14 )\cf16  ccTouchEnded\cf14 :(\cf16 UITouch \cf14 *)\cf16 touch withEvent\cf14 :(\cf16 UIEvent \cf14 *)\cf16 event \cf14 \{\cf16     \
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1 \cf11 \CocoaLigature0     \cf0  \
+    \cf5 CGPoint\cf0  touchLocation = [touch \cf13 locationInView\cf0 : [touch \cf13 view\cf0 ]];		\
+    touchLocation = [[\cf3 CCDirector\cf0  \cf4 sharedDirector\cf0 ] \cf4 convertToGL\cf0 : touchLocation];\
+    touchLocation = [\cf9 self\cf0  \cf4 convertToNodeSpace\cf0 :touchLocation];\
+\pard\tx560\pardeftab560\pardirnatural
+\cf19 \
+    \cf20 //Para que el gato se mueva por el ancho de la pantalla del iPhone (480 pixels), estimamos 3 seg  \
+    // V = d/t  480 pixeles / 3 seg
+\f5\fs26 \cf0 \CocoaLigature1 \
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1\fs28 \cf0 \CocoaLigature0 \
+    \cf9 float\cf0  catVelocity = \cf8 480.0\cf0 /\cf8 3.0\cf0 ;\
+\
+    \cf20 // se calcula la posici\'f3n del toque y del gato, para luego obtener la diferencia entre ambos. Es lo\
+    // que se tendr\'e1 que mover el gato al punto del touch\cf0 \
+    \cf5 CGPoint\cf0  moveDifference = \cf4 ccpSub\cf0 (touchLocation, \cf3 vspriteFromSheet\cf0 .\cf3 position\cf0 );\
+\
+\pard\tx560\pardeftab560\pardirnatural
+\cf20     //Se calcula la distancia real en la que ha movido el gato en una l\'ednea recta. Una hipotenusa que ya calcula \
+    // ccpLenght emplean o la diferencia de posici\'f3n obtenida entre el punto a y b (el gato con el touch)\
+\pard\tx560\pardeftab560\pardirnatural
+\cf0     \cf9 float\cf0  distanceToMove = \cf4 ccpLength\cf0 (moveDifference);\
+\
+    \cf20 //Lo que durar\'e1 el gato en movimiento al trasladarse. Lo obtenido del calculo de la hipotenusa, lo que debe\
+    //moverse en realidad sobre la velocidad (pix / seg)\cf0 \
+    \cf9 float\cf0  moveDuration = distanceToMove / catVelocity;\
+    \
+    \cf20 //Ahora se debe saber si el gato se debe mover a la izq o a la derecha. Si es menor a cero debe voltearse.\
+    //Como Nyan Cat est\'e1 mirando a la derecha, pues si es >0 se queda como est\'e1, sino debe voltearse para que mire a 	//la izq. De este modo COCOS2D nos facilita la tarea de no tener que crear varios sprites (uno mirando para un 		//lado y otro mirando para el contrario)\cf0 \
+    \cf9 if\cf0  (moveDifference.\cf5 x\cf0  > \cf8 0\cf0 ) \{\
+        \cf3 vspriteFromSheet\cf0 .\cf3 flipX\cf0  = \cf9 NO\cf0 ;\
+    \} \cf9 else\cf0  \{\
+        \cf3 vspriteFromSheet\cf0 .\cf3 flipX\cf0  = \cf9 YES\cf0 ;\
+    \}
+\fs22 \
+
+\fs28 \
+    \
+    \cf20 //Hacemos que el sprite se detenga la acci\'f3n de movimiento, porque debemos anular cualquier comando \
+    //que ya existiera para decirle que mueva el gato a otra posici\'f3n :D\cf0 \
+    [\cf3 vspriteFromSheet\cf0  \cf4 stopAction\cf0 :\cf3 vmoveAction\cf0 ];\
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs22 \cf0     
+\fs28  [\cf3 vspriteFromSheet\cf0  \cf4 stopAction\cf0 :\cf3 vwalkAction\cf0 ];\
+    \
+ \cf21  \cf20   //Le indicamos que se mueva al lugar que hemos calculado, proveniente del touch\cf0 \
+    \cf9 if\cf0  (!\cf3 vmoving\cf0 ) \{\
+        [\cf3 vspriteFromSheet\cf0  \cf4 runAction\cf0 :\cf3 vwalkAction\cf0 ];\
+    \}\
+\
+    \cf20 //\cf0 \
+    \cf9 self\cf0 .\cf3 moveAction\cf0  = [\cf3 CCSequence\cf0  \cf4 actions\cf0 :                          \
+                       [\cf3 CCMoveTo\cf0  \cf4 actionWithDuration\cf0 :moveDuration \cf4 position\cf0 :touchLocation],\
+                       [\cf3 CCCallFunc\cf0  \cf4 actionWithTarget\cf0 :\cf9 self\cf0  \cf4 selector\cf0 :\cf9 @selector\cf0 (catMoveEnded)],\
+                       \cf9 nil\cf0 ];\
+    \
+    [\cf3 vspriteFromSheet\cf0  \cf4 runAction\cf0 :\cf3 vmoveAction\cf0 ];   \
+    \cf3 vmoving\cf0  = \cf9 TRUE\cf0 ;
+\f6\i \cf18 \CocoaLigature1  
+\f4\i0 \cf16 \
+\pard\pardeftab720\sl300
+\cf14 \}\
+\
+\pard\pardeftab720\sl300
+
+\f1 \cf14 e) Metodo que indica si el gato debe detener cualquier movimiento
+\f4 \
+\
+\pard\tx560\pardeftab560\pardirnatural
+
+\f1 \cf0 \CocoaLigature0 -(\cf9 void\cf0 )catMoveEnded \{\
+    [\cf3 vcat\cf0  \cf4 stopAction\cf0 :\cf3 vwalkAction\cf0 ];\
+\pard\tx560\pardeftab560\pardirnatural
+
+\fs22 \cf0      [
+\fs28 \cf3 vspriteFromSheet\cf0  \cf4 runAction\cf0 :\cf3 vwalkAction\cf0 ];\
+    \cf3 vmoving\cf0  = \cf9 FALSE\cf0 ;\
+\}
+\f0 \CocoaLigature1 \
+\
+f) DEALLOC\
+\
+
+\f1\fs22 \CocoaLigature0 - (\cf9 void\cf0 ) dealloc\
+\{\
+    \cf9 self\cf0 .\cf3 cat\cf0  = \cf9 nil\cf0 ;\
+    \cf9 self\cf0 .\cf3 walkAction\cf0  = \cf9 nil\cf0 ;\
+	[\cf9 super\cf0  \cf13 dealloc\cf0 ];\
+\}\
+\
+\
+\
+\
+ACELEROMETRO\
+- (\cf9 void\cf0 )accelerometer:(\cf5 UIAccelerometer\cf0  *)accelerometer didAccelerate:(\cf5 UIAcceleration\cf0  *)acceleration \{\
+    \
+\pard\tx560\pardeftab560\pardirnatural
+\cf7 #define kFilteringFactor \cf8 0.1\cf7 \
+#define kRestAccelX -\cf8 0.6\cf7 \
+#define kShipMaxPointsPerSec (winSize.height*\cf8 0.5\cf7 )        \
+#define kMaxDiffX \cf8 0.2\cf7 \
+\pard\tx560\pardeftab560\pardirnatural
+\cf0     \
+    \cf5 UIAccelerationValue\cf0  rollingX, rollingY, rollingZ;\
+    \
+    rollingX = (acceleration.\cf5 x\cf0  * \cf7 kFilteringFactor\cf0 ) + (rollingX * (\cf8 1.0\cf0  - \cf7 kFilteringFactor\cf0 ));    \
+    rollingY = (acceleration.\cf5 y\cf0  * \cf7 kFilteringFactor\cf0 ) + (rollingY * (\cf8 1.0\cf0  - \cf7 kFilteringFactor\cf0 ));    \
+    rollingZ = (acceleration.\cf5 z\cf0  * \cf7 kFilteringFactor\cf0 ) + (rollingZ * (\cf8 1.0\cf0  - \cf7 kFilteringFactor\cf0 ));\
+    \
+    \cf9 float\cf0  accelX = acceleration.\cf5 x\cf0  - rollingX;\
+    \cf11 //float accelY = acceleration.y - rollingY;\cf0 \
+    \cf11 //float accelZ = acceleration.z - rollingZ;\cf0 \
+    \
+    \cf5 CGSize\cf0  winSize = [\cf3 CCDirector\cf0  \cf4 sharedDirector\cf0 ].\cf5 winSize\cf0 ;\
+    \
+    \cf9 float\cf0  accelDiff = accelX - \cf7 kRestAccelX\cf0 ;\
+    \cf9 float\cf0  accelFraction = accelDiff / \cf7 kMaxDiffX\cf0 ;\
+    \cf9 float\cf0  pointsPerSec = \cf7 kShipMaxPointsPerSec\cf0  * accelFraction;\
+    \
+    \cf3 vPointsPerSecY\cf0  = pointsPerSec;\
+    \
+\}\
+\
+}
